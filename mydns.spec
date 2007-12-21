@@ -18,6 +18,7 @@ BuildRequires:	MySQL-static-devel
 BuildRequires:	zlib-devel
 BuildRequires:	docbook-utils-pdf
 BuildRequires:	texinfo
+BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
 MyDNS is a free DNS server for UNIX implemented from scratch and
