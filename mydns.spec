@@ -3,7 +3,7 @@
 Summary:	A MySQL-based Internet DNS server
 Name:		mydns
 Version:	1.1.0
-Release:	%mkrel 3
+Release:	%mkrel 4
 License:	GPL
 Group:		System/Servers
 URL:		http://mydns.bboy.net/
