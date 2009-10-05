@@ -3,7 +3,7 @@
 Summary:	A MySQL-based Internet DNS server
 Name:		mydns
 Version:	1.1.0
-Release:	%mkrel 5
+Release:	%mkrel 6
 License:	GPL
 Group:		System/Servers
 URL:		http://mydns.bboy.net/
@@ -18,7 +18,7 @@ BuildRequires:	MySQL-static-devel
 BuildRequires:	zlib-devel
 BuildRequires:	docbook-utils-pdf
 BuildRequires:	texinfo
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
+BuildRoot:	%{_tmppath}/%{name}-%{version}
 
 %description
 MyDNS is a free DNS server for UNIX implemented from scratch and
@@ -41,8 +41,9 @@ non-MyDNS nameservers.
 
 %package	admin
 Summary:	Web admin GUI written in php for %{name}
-Group:          System/Servers
-Requires:	webserver mod_php php-common php-mysql
+Group:      System/Servers
+Requires:	mod_php
+Requires:	php-mysql
 Requires:	%{name} = %{version}
 
 %description	admin
