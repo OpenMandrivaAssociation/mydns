@@ -62,13 +62,11 @@ This package contains the development libraries and headers for
 %setup -q
 %patch0 -p0
 
-bzcat %{SOURCE1} > %{name}.init
-
 # path fix
 find -type f | xargs perl -pi -e "s|/usr/local/bin/php|%{_bindir}/php|g"
 
 %build
-
+autoreconf -fi
 %configure2_5x \
     --with-mysql \
     --with-mysql-lib=%{_libdir} \
@@ -114,7 +112,7 @@ perl -pi -e "s|^group = nogroup|group = %{name}|g" %{buildroot}%{_sysconfdir}/%{
 chmod 640 %{buildroot}%{_sysconfdir}/%{name}.conf
 
 # install sysv script
-install -m0755 %{name}.init %{buildroot}%{_initrddir}/%{name}
+install -m0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{name}
 
 # devel stuff
 install -d %{buildroot}%{_includedir}
