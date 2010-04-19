@@ -17,6 +17,7 @@ Requires(postun): rpm-helper
 BuildRequires:	MySQL-static-devel
 BuildRequires:	zlib-devel
 BuildRequires:	docbook-utils-pdf
+BuildRequires:	gettext-devel
 BuildRequires:	texinfo
 BuildRoot:	%{_tmppath}/%{name}-%{version}
 
