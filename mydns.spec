@@ -3,13 +3,13 @@
 Summary:	A MySQL-based Internet DNS server
 Name:		mydns
 Version:	1.1.0
-Release:	%mkrel 6
+Release:	%mkrel 7
 License:	GPL
 Group:		System/Servers
 URL:		http://mydns.bboy.net/
 Source0:	http://mydns.bboy.net/download/%{name}-%{version}.tar.bz2
-Source1:	%{name}.init.bz2
-Patch0:		mydns-0.11.0-conf.patch.bz2
+Source1:	%{name}.init
+Patch0:		mydns-0.11.0-conf.patch
 Requires(post): rpm-helper info-install
 Requires(preun): rpm-helper info-install
 Requires(pre): rpm-helper
