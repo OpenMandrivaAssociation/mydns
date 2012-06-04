@@ -3,23 +3,18 @@
 Summary:	A MySQL-based Internet DNS server
 Name:		mydns
 Version:	1.1.0
-Release:	%mkrel 9
+Release:	10
 License:	GPL
 Group:		System/Servers
 URL:		http://mydns.bboy.net/
 Source0:	http://mydns.bboy.net/download/%{name}-%{version}.tar.bz2
 Source1:	%{name}.init
 Patch0:		mydns-0.11.0-conf.patch
-Requires(post): rpm-helper info-install
-Requires(preun): rpm-helper info-install
-Requires(pre): rpm-helper
-Requires(postun): rpm-helper 
-BuildRequires:	MySQL-static-devel
+BuildRequires:	mysql-static-devel
 BuildRequires:	zlib-devel
 BuildRequires:	docbook-utils-pdf
 BuildRequires:	gettext-devel
 BuildRequires:	texinfo
-BuildRoot:	%{_tmppath}/%{name}-%{version}
 
 %description
 MyDNS is a free DNS server for UNIX implemented from scratch and
@@ -42,7 +37,7 @@ non-MyDNS nameservers.
 
 %package	admin
 Summary:	Web admin GUI written in php for %{name}
-Group:      System/Servers
+Group:		System/Servers
 Requires:	mod_php
 Requires:	php-mysql
 Requires:	%{name} = %{version}
@@ -52,7 +47,7 @@ This package contains a web admin GUI written in php for %{name}
 
 %package	devel
 Summary:	Development libraries and headers for %{name}
-Group:          Development/C
+Group:		Development/C
 
 %description	devel
 This package contains the development libraries and headers for
@@ -79,11 +74,6 @@ autoreconf -fi
 
 # use "--without-pgsql" until people complain about it ;)
 
-# use this patch or not?
-#pushd contrib
-#    patch -p0 < alias.patch
-#popd
-
 %make
 
 # build the pdf
@@ -92,7 +82,7 @@ pushd doc
 popd
 
 %install
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
+rm -rf %{buildroot}
 
 # don't fiddle with the initscript!
 export DONT_GPRINTIFY=1
@@ -128,20 +118,14 @@ install src/lib/libmydns.a %{buildroot}%{_libdir}/
 
 %post
 %_post_service %{name}
-%_install_info %{name}.info
 
 %preun
 %_preun_service %{name}
-%_remove_install_info %{name}.info
 
 %postun
 %_postun_userdel %{name}
 
-%clean
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
-
 %files -f %{name}.lang
-%defattr(-, root, root)
 %doc AUTHORS BUGS ChangeLog NEWS QUICKSTART* README* TODO doc/*.pdf
 %doc contrib/README.alias
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}.conf
@@ -153,14 +137,12 @@ install src/lib/libmydns.a %{buildroot}%{_libdir}/
 %dir %attr(0755,%{name},%{name}) /var/run/%{name}
 
 %files admin
-%defattr(-, root, root)
 %doc contrib/README
 %dir %{webadminroot}/%{name}
 %config(noreplace) %attr(0644,root,root) %{webadminroot}/%{name}/index.php
 %attr(0644,root,root) %{webadminroot}/%{name}/stats.php
 
 %files devel
-%defattr(-, root, root)
 %{_libdir}/*.a
 %{_includedir}/*.h
 
