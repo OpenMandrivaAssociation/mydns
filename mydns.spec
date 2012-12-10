@@ -146,3 +146,143 @@ install src/lib/libmydns.a %{buildroot}%{_libdir}/
 %{_libdir}/*.a
 %{_includedir}/*.h
 
+
+
+%changelog
+* Mon Jun 04 2012 Andrey Bondrov <abondrov@mandriva.org> 1.1.0-10
++ Revision: 802238
+- Drop some legacy junk
+
+  + Oden Eriksson <oeriksson@mandriva.com>
+    - relink against libmysqlclient.so.18
+
+* Mon Dec 06 2010 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-8mdv2011.0
++ Revision: 612972
+- the mass rebuild of 2010.1 packages
+
+* Mon Apr 19 2010 Funda Wang <fwang@mandriva.org> 1.1.0-7mdv2010.1
++ Revision: 536598
+- BR gettext-devel
+- fix spec file
+- rebuild
+
+* Mon Oct 05 2009 Guillaume Rousse <guillomovitch@mandriva.org> 1.1.0-6mdv2010.0
++ Revision: 454243
+- fix dependencies
+
+* Fri Sep 04 2009 Thierry Vignaud <tv@mandriva.org> 1.1.0-5mdv2010.0
++ Revision: 430138
+- rebuild
+
+* Mon Jun 16 2008 Thierry Vignaud <tv@mandriva.org> 1.1.0-4mdv2009.0
++ Revision: 220145
+- rebuild
+- kill re-definition of %%buildroot on Pixel's request
+- import mydns
+
+  + Olivier Blin <blino@mandriva.org>
+    - restore BuildRoot
+
+
+* Mon Sep 04 2006 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-1mdv2007.0
+- rebuilt against MySQL-5.0.24a-1mdv2007.0 due to ABI changes
+
+* Thu Apr 06 2006 Michael Scherer <misc@mandriva.org> 1.1.0-2mdk
+- correct the requires, fix #21880
+
+* Fri Feb 24 2006 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-1mdk
+- 1.1.0
+- drop upstream patches; P1
+- fix deps
+
+* Fri Nov 18 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-4mdk
+- rebuilt against openssl-0.9.8a
+
+* Sun Oct 30 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-3mdk
+- rebuilt against MySQL-5.0.15
+
+* Tue May 10 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-2mdk
+- lib64 fixes
+- added one gcc4 patch (debian)
+- rpmlint fixes
+
+* Mon Jan 24 2005 Oden Eriksson <oeriksson@mandrakesoft.com> 1.0.0-1mdk
+- 1.0.0
+- rebuilt against MySQL-4.1.x system libs
+- drop the daemontools stuff
+- own the %%{webadminroot}/%%{name} dir
+
+* Sat May 22 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 0.11.0-1mdk
+- 0.11.0
+- new P0
+- fix deps
+- added the stats.php file
+- fix ownership of the /var/run/mydns directory
+- misc spec file fixes
+
+* Tue Dec 16 2003 Lenny Cartier <lenny@mandrakesoft.com> 0.10.1-1mdk
+- 0.10.1
+
+* Sun Aug 17 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.10.0-1mdk
+- 0.10.0
+
+* Thu Jul 31 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.13-1mdk
+- 0.9.13
+
+* Fri Jul 25 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.12-1mdk
+- 0.9.12
+- use the %%configure2_5x macro
+- added P0
+- fixed S1
+- misc spec file fixes
+
+* Thu Jul 10 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.10-2mdk
+- rebuild
+
+* Sun May 04 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.10-1mdk
+- 0.9.10
+
+* Fri Apr 25 2003 Marcel Pol <mpol@gmx.net> 0.9.9-3mdk
+- buildrequires
+
+* Sun Apr 13 2003 Marcel Pol <mpol@gmx.net> 0.9.9-2mdk
+- buildrequires
+
+* Tue Apr 08 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.9-1mdk
+- 0.9.9
+
+* Sat Mar 29 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.8-1mdk
+- 0.9.8
+- html docs is gone, bring in pdf
+- misc spec file fixes
+
+* Tue Mar 11 2003 Marcel Pol <mpol@gmx.net> 0.9.7-2mdk
+- conflicts: tmdns
+- include locales
+
+* Sat Mar 08 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.7-1mdk
+- 0.9.7
+
+* Wed Mar 05 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.6-1mdk
+- 0.9.6
+- rebuilt against latest mysql
+- misc spec file fixes
+
+* Thu Jan 16 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.5-2mdk
+- build release
+
+* Mon Dec 16 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.5-1mdk
+- new version
+- new S1
+- misc spec file fixes
+- new sub package "devel"
+- run as mydns:mydns
+
+* Sat Sep 28 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.3-1mdk
+- new version
+- misc spec file fixes
+
+* Thu Sep 19 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.2-1mdk
+- initial cooker contrib
+- install web admin stuff in common %%{webadminroot}/ directory
+- added a simple init script

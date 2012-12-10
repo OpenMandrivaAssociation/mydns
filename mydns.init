@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# mydns This shell script takes care of starting and stopping MyDNS.
+#
+# chkconfig: 345 55 45
+# description: MyDNS is a Domain Name Server (DNS) \
+# that is used to resolve host names to IP addresses.
+# probe: true
+# processname: mydns
+# pidfile: /var/run/mydns.pid
+# config: /etc/mydns.conf
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+[ -f /etc/mydns.conf ] || exit 0
+
+[ -f /usr/sbin/mydns ] || exit 0
+
+# See how we were called.
+case "$1" in
+start)
+	echo -n "Starting MyDNS daemon: "
+	daemon mydns --background --conf=/etc/mydns.conf
+	echo
+	touch /var/lock/subsys/mydns
+	;;
+stop)
+	echo -n "Shutting down MyDNS daemon: "
+	killproc mydns
+	echo
+	rm -f /var/lock/subsys/mydns
+	;;
+status)
+	status mydns
+	;;
+restart|reload)
+	$0 stop
+	$0 start
+	;;
+condrestart)
+	[ -f /var/lock/subsys/mydns ] && restart
+	;;
+  *)
+	echo "Usage: mydns {start|stop|status|restart|condrestart|reload}"
+	exit 1
+esac
+
+exit 0
+
