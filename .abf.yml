@@ -1,2 +1,4 @@
+removed_sources:
+  mydns-1.1.0.tar.bz2: 71979409bf46e38b443ee940a6ecb0e42464bc0b
 sources:
-  "mydns-1.1.0.tar.bz2": 71979409bf46e38b443ee940a6ecb0e42464bc0b
+  mydns-1.2.8.31.tar.gz: b076335d405b353c81efc0de8624b1fef5a7cc4e

@@ -1,0 +1,15 @@
+please run alternatives first and select what version of mydns you want.
+
+su -c 'alternatives --config MyDNS'
+Password:
+
+There are 2 programs which provide 'MyDNS'.
+
+  Selection    Command
+  -----------------------------------------------
+  *+ 1           /usr/sbin/mydns-mysql
+     2           /usr/sbin/mydns-pgsql
+
+Enter to keep the current selection[+], or type selection number:
+
+if you want mydns with mysql support please answer 1, otherwise answer 2

@@ -1,288 +1,248 @@
-%define webadminroot /var/www/html/admin
+%define base_version 1.2.8
+%define mydns_user   mydns
+%define mydns_group  mydns
+%define mydns_home   %{_localstatedir}/lib/mydns
 
-Summary:	A MySQL-based Internet DNS server
-Name:		mydns
-Version:	1.1.0
-Release:	10
-License:	GPL
-Group:		System/Servers
-URL:		http://mydns.bboy.net/
-Source0:	http://mydns.bboy.net/download/%{name}-%{version}.tar.bz2
-Source1:	%{name}.init
-Patch0:		mydns-0.11.0-conf.patch
-BuildRequires:	mysql-static-devel
-BuildRequires:	zlib-devel
-BuildRequires:	docbook-utils-pdf
-BuildRequires:	gettext-devel
-BuildRequires:	texinfo
+Summary: A Database based DNS server
+
+Name:    mydns
+Version: 1.2.8.31
+Release: 1
+License: GPLv2+
+Group:   System/Servers
+URL:     http://mydns-ng.com/
+#URL: http://mydns.bboy.net/  this is the original website, but mydns is no more  maintaned by it's original creator
+#because this mydns-ng in sourceforge was created
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+Source1: HOWTO
+Source2: mydns.service
+
+BuildRequires: mysql-devel
+BuildRequires: postgresql-devel
+BuildRequires: texinfo
+
+Requires(pre):     shadow-utils
+Requires(post):    info
+Requires(preun):   info
+Requires(post):    systemd-units
+Requires(preun):   systemd-units
+Requires(postun):  systemd-units
+
+Patch0: mydns_user.patch
 
 %description
-MyDNS is a free DNS server for UNIX implemented from scratch and
-designed to utilize the MySQL database for data storage.
+A nameserver that serves records directly from your database.
 
-Its primary objectives are stability, security, interoperability,
-and speed, though not necessarily in that order.
+%package mysql
+Summary: MyDNS compiled with MySQL support
 
-MyDNS does not include recursive name service, nor a resolver
-library. It is primarily designed for organizations with many
-zones and/or resource records who desire the ability to perform
-real-time dynamic updates on their DNS data via MySQL.
+Group: System/Servers
+Requires: %{name} = %{version}-%{release}
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
-MyDNS starts and is ready to answer questions immediately, no
-matter how much DNS data you have in the database. It is extremely
-fast and memory-efficient. It includes complete documentation,
-including a manual and a FAQ. It supports a few frills, including
-round robin DNS, dynamic load balancing, and outgoing AXFR for
-non-MyDNS nameservers.
 
-%package	admin
-Summary:	Web admin GUI written in php for %{name}
-Group:		System/Servers
-Requires:	mod_php
-Requires:	php-mysql
-Requires:	%{name} = %{version}
+%description mysql
+MyDNS compiled with MySQL support
 
-%description	admin
-This package contains a web admin GUI written in php for %{name}
+%package pgsql
+Summary: MyDNS compiled with PostGreSQL support
 
-%package	devel
-Summary:	Development libraries and headers for %{name}
-Group:		Development/C
+Group: System/Servers
+Requires: %{name} = %{version}-%{release}
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
-%description	devel
-This package contains the development libraries and headers for
-%{name}
+
+%description pgsql
+MyDNS compiled with PostGreSQL support
 
 %prep
-
 %setup -q
-%patch0 -p0
+%patch0 -p1
 
-# path fix
-find -type f | xargs perl -pi -e "s|/usr/local/bin/php|%{_bindir}/php|g"
+#install doc about alternatives
+install -Dp -m 644 %{SOURCE1} ./HOWTO
+
+# Convert to utf-8
+for file in AUTHORS; do
+    mv $file timestamp
+    iconv -f ISO-8859-1 -t UTF-8 -o $file timestamp
+    touch -r timestamp $file
+done
 
 %build
-autoreconf -fi
-%configure2_5x \
+#mydns current doesn't support loadable modules support, so We need to compile it 2 times and use alternatives, :-(
+%configure \
+    --without-pgsql \
     --with-mysql \
-    --with-mysql-lib=%{_libdir} \
+    --with-mysql-lib=%{_libdir}/mysql \
     --with-mysql-include=%{_includedir}/mysql \
     --with-zlib=%{_libdir} \
-    --without-pgsql \
     --enable-status \
     --enable-alias
 
-# use "--without-pgsql" until people complain about it ;)
+%make
+make install DESTDIR=$(pwd)/mysql
+
+%configure \
+    --with-pgsql \
+    --without-mysql \
+    --with-pgsql-lib=%{_libdir} \
+    --with-pgsql-include=%{_includedir} \
+    --with-zlib=%{_libdir} \
+    --enable-status \
+    --enable-alias
 
 %make
-
-# build the pdf
-pushd doc
-    make pdf
-popd
+make install DESTDIR=$(pwd)/pgsql
 
 %install
-rm -rf %{buildroot}
 
-# don't fiddle with the initscript!
-export DONT_GPRINTIFY=1
+#create homedir for mydns user
+%{__install} -d %{buildroot}%{mydns_home}
 
-%makeinstall
+#install mysql and pgsql files
+for database in mysql pgsql; do
+    install -Dp ./$database%{_bindir}/mydnscheck %{buildroot}%{_bindir}/mydnscheck-$database
+    install -Dp ./$database%{_bindir}/mydns-conf %{buildroot}%{_bindir}/mydns-conf-$database
+    install -Dp ./$database%{_bindir}/mydnsexport %{buildroot}%{_bindir}/mydnsexport-$database
+    install -Dp ./$database%{_bindir}/mydnsptrconvert %{buildroot}%{_bindir}/mydnsptrconvert-$database
+    install -Dp ./$database%{_bindir}/mydnsimport %{buildroot}%{_bindir}/mydnsimport-$database
+    install -Dp ./$database%{_sbindir}/mydns %{buildroot}%{_sbindir}/mydns-$database
 
-install -d %{buildroot}%{_initrddir}
-install -d %{buildroot}%{webadminroot}/%{name}
-install -d %{buildroot}/var/run/%{name}
+    install -d %{buildroot}%{_datadir}/locale
+    cp -a ./$database%{_datadir}/locale %{buildroot}%{_datadir}
+done
 
-install -m644 contrib/admin.php %{buildroot}%{webadminroot}/%{name}/index.php
-install -m644 contrib/stats.php %{buildroot}%{webadminroot}/%{name}/
+%find_lang %{name}
 
-# generate and fix the config on the fly
-%{buildroot}%{_sbindir}/mydns --dump-config > %{buildroot}%{_sysconfdir}/%{name}.conf
-perl -pi -e "s|^user = nobody|user = %{name}|g" %{buildroot}%{_sysconfdir}/%{name}.conf
-perl -pi -e "s|^group = nogroup|group = %{name}|g" %{buildroot}%{_sysconfdir}/%{name}.conf
-chmod 640 %{buildroot}%{_sysconfdir}/%{name}.conf
+#main package (all files not linked with mysql or pgsql)
+install -Dp -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/mydns.service
+install -Dp -m 600 mydns.conf %{buildroot}%{_sysconfdir}/mydns.conf
+install -Dp -m 644 contrib/admin.php %{buildroot}%{_datadir}/%{name}/admin.php
 
-# install sysv script
-install -m0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{name}
+install -Dp -m 644 doc/mydns.conf.5 %{buildroot}%{_mandir}/man5/mydns.conf.5
+install -Dp -m 644 doc/mydns.8 %{buildroot}%{_mandir}/man8/mydns.8
+install -Dp -m 644 doc/mydnscheck.8 %{buildroot}%{_mandir}/man8/mydnscheck.8
+install -Dp -m 644 doc/mydnsexport.8 %{buildroot}%{_mandir}/man8/mydnsexport.8
+install -Dp -m 644 doc/mydnsimport.8 %{buildroot}%{_mandir}/man8/mydnsimport.8
+install -Dp -m 644 doc/mydns-conf.8 %{buildroot}%{_mandir}/man8/mydns-conf.8
+install -Dp -m 644 doc/mydns.info %{buildroot}%{_infodir}/mydns.info
 
-# devel stuff
-install -d %{buildroot}%{_includedir}
-install -d %{buildroot}%{_libdir}
-install src/lib/mydns.h %{buildroot}%{_includedir}/
-install src/lib/libmydns.a %{buildroot}%{_libdir}/
-
-%{find_lang} %{name}
+%clean
 
 %pre
-%_pre_useradd %{name} /var/lib/%{name} /bin/false
+getent group %{mydns_group} >/dev/null || groupadd -r %{mydns_group}
+getent passwd %{mydns_user} >/dev/null || \
+useradd -r -g %{mydns_group} -d %{mydns_home}  -s /sbin/nologin \
+-c "MyDNS - database based DNS server account" %{mydns_user}
+exit 0
 
 %post
-%_post_service %{name}
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
 
 %preun
-%_preun_service %{name}
+if [ $1 -eq 0 ]; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable mydns.service > /dev/null 2>&1 || :
+    /bin/systemctl stop mydns.service > /dev/null 2>&1 || :
+fi
 
-%postun
-%_postun_userdel %{name}
+%postun mysql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart mydns.service >/dev/null 2>&1 || :
+fi
+
+%postun pgsql
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart mydns.service >/dev/null 2>&1 || :
+fi
+
+%post pgsql
+%{_sbindir}/alternatives --install %{_sbindir}/mydns MyDNS %{_sbindir}/mydns-pgsql 1 \
+    --slave %{_bindir}/mydnscheck mydnscheck %{_bindir}/mydnscheck-pgsql \
+    --slave %{_bindir}/mydnsexport mydnsexport %{_bindir}/mydnsexport-pgsql \
+    --slave %{_bindir}/mydnsimport mydnsimport %{_bindir}/mydnsimport-pgsql \
+    --slave %{_bindir}/mydnsptrconvert mydnsptrconvert %{_bindir}/mydnsptrconvert-pgsql
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+
+
+%post mysql
+%{_sbindir}/alternatives --install %{_sbindir}/mydns MyDNS %{_sbindir}/mydns-mysql 2 \
+    --slave %{_bindir}/mydnscheck mydnscheck %{_bindir}/mydnscheck-mysql \
+    --slave %{_bindir}/mydnsexport mydnsexport %{_bindir}/mydnsexport-mysql \
+    --slave %{_bindir}/mydnsimport mydnsimport %{_bindir}/mydnsimport-mysql \
+    --slave %{_bindir}/mydnsptrconvert mydnsptrconvert %{_bindir}/mydnsptrconvert-mysql
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+
+%preun pgsql
+# When not removal, exit immediately
+[ $1 = 0 ] || exit 0
+( LANG=C ; \
+	if ( %{_sbindir}/alternatives --display MyDNS | \
+		grep point | grep -q %{_sbindir}/mydns-pgsql ) ; \
+		then /bin/systemctl --no-reload disable mydns.service > /dev/null 2>&1 && \
+		    /bin/systemctl stop mydns.service > /dev/null 2>&1 || : \
+	fi ; \
+)
+%{_sbindir}/alternatives -remove MyDNS %{_sbindir}/mydns-pgsql
+exit 0
+
+
+%preun mysql
+# When not removal, exit immediately
+[ $1 = 0 ] || exit 0
+( LANG=C ; \
+	if ( %{_sbindir}/alternatives --display MyDNS | \
+		grep point | grep -q %{_sbindir}/mydns-mysql ) ; \
+		then /bin/systemctl --no-reload disable mydns.service > /dev/null 2>&1 && \
+		    /bin/systemctl stop mydns.service > /dev/null 2>&1 || : \
+	fi ; \
+)
+%{_sbindir}/alternatives -remove MyDNS %{_sbindir}/mydns-mysql
+exit 0
 
 %files -f %{name}.lang
-%doc AUTHORS BUGS ChangeLog NEWS QUICKSTART* README* TODO doc/*.pdf
-%doc contrib/README.alias
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}.conf
-%attr(0755,root,root) %{_initrddir}/%{name}
-%{_bindir}/%{name}*
-%{_sbindir}/%{name}
 %{_mandir}/man?/*
-%{_infodir}/*
-%dir %attr(0755,%{name},%{name}) /var/run/%{name}
+%{_infodir}/mydns.info*
+%doc AUTHORS ChangeLog COPYING NEWS README TODO HOWTO
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/mydns.conf
+%{_unitdir}/mydns.service
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/admin.php
+%attr(-,%{mydns_user},%{mydns_group}) %dir %{mydns_home}
 
-%files admin
-%doc contrib/README
-%dir %{webadminroot}/%{name}
-%config(noreplace) %attr(0644,root,root) %{webadminroot}/%{name}/index.php
-%attr(0644,root,root) %{webadminroot}/%{name}/stats.php
+%files mysql
+%doc QUICKSTART.mysql
+%{_bindir}/mydnscheck-mysql
+%{_bindir}/mydns-conf-mysql
+%{_bindir}/mydnsexport-mysql
+%{_bindir}/mydnsptrconvert-mysql
+%{_bindir}/mydnsimport-mysql
+%{_sbindir}/mydns-mysql
 
-%files devel
-%{_libdir}/*.a
-%{_includedir}/*.h
+%files pgsql
+%doc QUICKSTART.postgres
+%{_bindir}/mydnscheck-pgsql
+%{_bindir}/mydns-conf-pgsql
+%{_bindir}/mydnsexport-pgsql
+%{_bindir}/mydnsptrconvert-pgsql
+%{_bindir}/mydnsimport-pgsql
+%{_sbindir}/mydns-pgsql
 
-
-
-%changelog
-* Mon Jun 04 2012 Andrey Bondrov <abondrov@mandriva.org> 1.1.0-10
-+ Revision: 802238
-- Drop some legacy junk
-
-  + Oden Eriksson <oeriksson@mandriva.com>
-    - relink against libmysqlclient.so.18
-
-* Mon Dec 06 2010 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-8mdv2011.0
-+ Revision: 612972
-- the mass rebuild of 2010.1 packages
-
-* Mon Apr 19 2010 Funda Wang <fwang@mandriva.org> 1.1.0-7mdv2010.1
-+ Revision: 536598
-- BR gettext-devel
-- fix spec file
-- rebuild
-
-* Mon Oct 05 2009 Guillaume Rousse <guillomovitch@mandriva.org> 1.1.0-6mdv2010.0
-+ Revision: 454243
-- fix dependencies
-
-* Fri Sep 04 2009 Thierry Vignaud <tv@mandriva.org> 1.1.0-5mdv2010.0
-+ Revision: 430138
-- rebuild
-
-* Mon Jun 16 2008 Thierry Vignaud <tv@mandriva.org> 1.1.0-4mdv2009.0
-+ Revision: 220145
-- rebuild
-- kill re-definition of %%buildroot on Pixel's request
-- import mydns
-
-  + Olivier Blin <blino@mandriva.org>
-    - restore BuildRoot
-
-
-* Mon Sep 04 2006 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-1mdv2007.0
-- rebuilt against MySQL-5.0.24a-1mdv2007.0 due to ABI changes
-
-* Thu Apr 06 2006 Michael Scherer <misc@mandriva.org> 1.1.0-2mdk
-- correct the requires, fix #21880
-
-* Fri Feb 24 2006 Oden Eriksson <oeriksson@mandriva.com> 1.1.0-1mdk
-- 1.1.0
-- drop upstream patches; P1
-- fix deps
-
-* Fri Nov 18 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-4mdk
-- rebuilt against openssl-0.9.8a
-
-* Sun Oct 30 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-3mdk
-- rebuilt against MySQL-5.0.15
-
-* Tue May 10 2005 Oden Eriksson <oeriksson@mandriva.com> 1.0.0-2mdk
-- lib64 fixes
-- added one gcc4 patch (debian)
-- rpmlint fixes
-
-* Mon Jan 24 2005 Oden Eriksson <oeriksson@mandrakesoft.com> 1.0.0-1mdk
-- 1.0.0
-- rebuilt against MySQL-4.1.x system libs
-- drop the daemontools stuff
-- own the %%{webadminroot}/%%{name} dir
-
-* Sat May 22 2004 Oden Eriksson <oeriksson@mandrakesoft.com> 0.11.0-1mdk
-- 0.11.0
-- new P0
-- fix deps
-- added the stats.php file
-- fix ownership of the /var/run/mydns directory
-- misc spec file fixes
-
-* Tue Dec 16 2003 Lenny Cartier <lenny@mandrakesoft.com> 0.10.1-1mdk
-- 0.10.1
-
-* Sun Aug 17 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.10.0-1mdk
-- 0.10.0
-
-* Thu Jul 31 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.13-1mdk
-- 0.9.13
-
-* Fri Jul 25 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.12-1mdk
-- 0.9.12
-- use the %%configure2_5x macro
-- added P0
-- fixed S1
-- misc spec file fixes
-
-* Thu Jul 10 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.10-2mdk
-- rebuild
-
-* Sun May 04 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.10-1mdk
-- 0.9.10
-
-* Fri Apr 25 2003 Marcel Pol <mpol@gmx.net> 0.9.9-3mdk
-- buildrequires
-
-* Sun Apr 13 2003 Marcel Pol <mpol@gmx.net> 0.9.9-2mdk
-- buildrequires
-
-* Tue Apr 08 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.9-1mdk
-- 0.9.9
-
-* Sat Mar 29 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.8-1mdk
-- 0.9.8
-- html docs is gone, bring in pdf
-- misc spec file fixes
-
-* Tue Mar 11 2003 Marcel Pol <mpol@gmx.net> 0.9.7-2mdk
-- conflicts: tmdns
-- include locales
-
-* Sat Mar 08 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.7-1mdk
-- 0.9.7
-
-* Wed Mar 05 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.6-1mdk
-- 0.9.6
-- rebuilt against latest mysql
-- misc spec file fixes
-
-* Thu Jan 16 2003 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.5-2mdk
-- build release
-
-* Mon Dec 16 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.5-1mdk
-- new version
-- new S1
-- misc spec file fixes
-- new sub package "devel"
-- run as mydns:mydns
-
-* Sat Sep 28 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.3-1mdk
-- new version
-- misc spec file fixes
-
-* Thu Sep 19 2002 Oden Eriksson <oden.eriksson@kvikkjokk.net> 0.9.2-1mdk
-- initial cooker contrib
-- install web admin stuff in common %%{webadminroot}/ directory
-- added a simple init script

@@ -1,0 +1,13 @@
+--- old/mydns.conf	2009-01-30 18:08:59.000000000 -0200
++++ new/mydns.conf	2009-01-30 18:10:54.000000000 -0200
+@@ -15,8 +15,8 @@ database = mydns            	# MyDNS dat
+ 
+                             	# GENERAL OPTIONS
+ 
+-user = nobody               	# Run with the permissions of this user
+-group = nobody              	# Run with the permissions of this group
++user = mydns               	# Run with the permissions of this user
++group = mydns              	# Run with the permissions of this group
+ listen = *                  	# Listen on these addresses ('*' for all)
+ no-listen =                 	# Do not listen on these addresses
+ 

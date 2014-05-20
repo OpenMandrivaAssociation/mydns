@@ -1,0 +1,13 @@
+[Unit]
+Description=Mydns - SQL Based Internet Name Daemon
+After=network.target
+After=mysqld.service
+After=postgresql.service
+
+[Service]
+Type=forking
+PIDFile=/run/mydns.pid
+ExecStart=/usr/sbin/mydns -b
+
+[Install]
+WantedBy=multi-user.target
