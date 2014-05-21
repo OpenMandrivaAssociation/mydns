@@ -1,0 +1,78 @@
+diff -Naur mydns-1.2.8.31.orig/configure mydns-1.2.8.31/configure
+--- mydns-1.2.8.31.orig/configure	2014-05-20 11:34:36.651560686 +0400
++++ mydns-1.2.8.31/configure	2014-05-20 11:51:26.765581314 +0400
+@@ -16141,7 +16141,7 @@
+ 					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 
+-		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib"
++		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib /usr/lib64"
+ 
+ # Check whether --with-mysql-lib was given.
+ if test "${with_mysql_lib+set}" = set; then :
+@@ -16231,7 +16231,7 @@
+ 					## libmysqlclient depends on libz
+ 					if ! test -n "$LIBZ"; then
+ 
+-		ac_zlib_dirs="/lib /usr/lib /usr/local/lib"
++		ac_zlib_dirs="/lib /usr/lib /usr/local/lib /usr/lib64"
+ 
+ # Check whether --with-zlib was given.
+ if test "${with_zlib+set}" = set; then :
+@@ -16397,7 +16397,7 @@
+ 				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 
+-		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib"
++		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib /usr/lib64"
+ 
+ # Check whether --with-mysql-lib was given.
+ if test "${with_mysql_lib+set}" = set; then :
+@@ -16487,7 +16487,7 @@
+ 					## libmysqlclient depends on libz
+ 					if ! test -n "$LIBZ"; then
+ 
+-		ac_zlib_dirs="/lib /usr/lib /usr/local/lib"
++		ac_zlib_dirs="/lib /usr/lib /usr/local/lib /usr/lib64"
+ 
+ # Check whether --with-zlib was given.
+ if test "${with_zlib+set}" = set; then :
+@@ -16667,7 +16667,7 @@
+ 					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 
+-		ac_mydns_lib_dirs="/usr/local/pgsql/lib /lib /usr/lib /usr/local/lib"
++		ac_mydns_lib_dirs="/usr/local/pgsql/lib /lib /usr/lib /usr/local/lib /usr/lib64"
+ 
+ # Check whether --with-pgsql-lib was given.
+ if test "${with_pgsql_lib+set}" = set; then :
+@@ -16803,7 +16803,7 @@
+ 				{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 
+-		ac_mydns_lib_dirs="/usr/local/pgsql/lib /lib /usr/lib /usr/local/lib"
++		ac_mydns_lib_dirs="/usr/local/pgsql/lib /lib /usr/lib /usr/local/lib /usr/lib64"
+ 
+ # Check whether --with-pgsql-lib was given.
+ if test "${with_pgsql_lib+set}" = set; then :
+@@ -16949,7 +16949,7 @@
+ 					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 
+-		ac_ssl_lib_dirs="/lib /usr/lib /usr/local/lib /usr/ssl/lib /usr/local/ssl/lib"
++		ac_ssl_lib_dirs="/lib /usr/lib /usr/local/lib /usr/ssl/lib /usr/local/ssl/lib /usr/lib64"
+ 
+ # Check whether --with-openssl-lib was given.
+ if test "${with_openssl_lib+set}" = set; then :
+diff -Naur mydns-1.2.8.31.orig/m4/mydns.m4 mydns-1.2.8.31/m4/mydns.m4
+--- mydns-1.2.8.31.orig/m4/mydns.m4	2014-05-21 00:21:54.000000000 +0400
++++ mydns-1.2.8.31/m4/mydns.m4	2014-05-21 00:22:05.000000000 +0400
+@@ -542,7 +542,7 @@
+ ##
+ AC_DEFUN([AC_LIB_MYSQLCLIENT],
+ 	[
+-		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib"
++		libmysqlclient_dirs="/usr/local/mysql/lib /usr/local/lib/mysql /usr/local/lib /usr/lib/mysql /usr/lib /lib /usr/lib64"
+ 		AC_ARG_WITH(mysql-lib,
+ 			AC_HELP_STRING([--with-mysql-lib=DIR], [look for the MySQL client library in DIR]),
+ 			libmysqlclient_dirs="$withval $libmysqlclient_dirs")

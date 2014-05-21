@@ -18,17 +18,23 @@ Source1: HOWTO
 Source2: mydns.service
 
 BuildRequires: mysql-devel
+BuildRequires: mysql-static-devel
 BuildRequires: postgresql-devel
+BuildRequires: mysql
+BuildRequires: postgresql
 BuildRequires: texinfo
+BuildRequires: gettext-devel
+BuildRequires: zlib-devel
+BuildRequires: docbook-utils-pdf
 
 Requires(pre):     shadow-utils
-Requires(post):    info
-Requires(preun):   info
 Requires(post):    systemd-units
 Requires(preun):   systemd-units
 Requires(postun):  systemd-units
 
 Patch0: mydns_user.patch
+Patch1: mydns-1.2.8.31-lib64.patch
+Patch2:	mydns-1.2.8.31-texi.patch
 
 %description
 A nameserver that serves records directly from your database.
@@ -62,6 +68,8 @@ MyDNS compiled with PostGreSQL support
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
 
 #install doc about alternatives
 install -Dp -m 644 %{SOURCE1} ./HOWTO
@@ -83,6 +91,8 @@ done
     --with-zlib=%{_libdir} \
     --enable-status \
     --enable-alias
+
+# sed -i.bak 's#libmysqlclient_dirs="#libmysqlclient_dirs="/usr/lib64 #' ./configure
 
 %make
 make install DESTDIR=$(pwd)/mysql
