@@ -7,7 +7,7 @@ Summary: A Database based DNS server
 
 Name:    mydns
 Version: 1.2.8.31
-Release: 1
+Release: 2
 License: GPLv2+
 Group:   System/Servers
 URL:     http://mydns-ng.com/
