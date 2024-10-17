@@ -10,7 +10,7 @@ Version: 1.2.8.31
 Release: 2
 License: GPLv2+
 Group:   System/Servers
-URL:     http://mydns-ng.com/
+URL:     https://mydns-ng.com/
 #URL: http://mydns.bboy.net/  this is the original website, but mydns is no more  maintaned by it's original creator
 #because this mydns-ng in sourceforge was created
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
