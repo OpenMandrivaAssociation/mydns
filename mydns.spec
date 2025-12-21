@@ -17,6 +17,11 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1: HOWTO
 Source2: mydns.service
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires: mysql-devel
 BuildRequires: mysql-static-devel
 BuildRequires: postgresql-devel
